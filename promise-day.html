@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💝 Promise Day Special 💝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #b8e0ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            animation: float 15s infinite;
+            opacity: 0.4;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            color: #6366f1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            color: #8b5cf6;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(99,102,241,0.3);
+            margin-bottom: 30px;
+        }
+
+        .welcome-screen img {
+            width: 250px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen h2 {
+            color: #6366f1;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .welcome-screen p {
+            color: #8b5cf6;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(99,102,241,0.4);
+            transition: transform 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .game-container {
+            display: none;
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(99,102,241,0.3);
+            animation: fadeIn 0.5s;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .game-header h3 {
+            color: #6366f1;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .game-content {
+            margin: 20px 0;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .puzzle-piece {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
+            border: 3px solid #8b5cf6;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        }
+
+        .puzzle-piece.matched {
+            background: linear-gradient(135deg, #90EE90, #98FB98);
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .choice-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .choice-btn {
+            background: linear-gradient(135deg, #ddd6fe, #c7d2fe);
+            border: 3px solid #8b5cf6;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6366f1;
+            font-weight: bold;
+        }
+
+        .choice-btn:hover {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .word-scramble {
+            text-align: center;
+        }
+
+        .scrambled-word {
+            font-size: 2.5em;
+            color: #6366f1;
+            letter-spacing: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .word-input {
+            font-size: 1.5em;
+            padding: 15px;
+            border: 3px solid #8b5cf6;
+            border-radius: 15px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(99,102,241,0.4);
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .promise-reveal {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f3ff, #ddd6fe);
+            border-radius: 20px;
+            margin-top: 20px;
+            border: 3px solid #6366f1;
+            display: none;
+        }
+
+        .promise-reveal.show {
+            display: block;
+            animation: bounceIn 0.8s;
+        }
+
+        .promise-reveal img {
+            width: 200px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+
+        .promise-text {
+            font-size: 1.5em;
+            color: #6366f1;
+            font-weight: bold;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+
+        .next-game-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(99,102,241,0.4);
+            transition: transform 0.3s;
+            margin-top: 20px;
+        }
+
+        .next-game-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .final-message {
+            display: none;
+            text-align: center;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(99,102,241,0.3);
+        }
+
+        .final-message.show {
+            display: block;
+            animation: fadeIn 1s;
+        }
+
+        .final-message h2 {
+            color: #6366f1;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .final-message img {
+            width: 250px;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .maze-game {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .maze-cell {
+            aspect-ratio: 1;
+            background: #ddd6fe;
+            border: 2px solid #8b5cf6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .maze-cell:hover {
+            background: #c7d2fe;
+        }
+
+        .maze-cell.player {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        .maze-cell.goal {
+            background: linear-gradient(135deg, #90EE90, #98FB98);
+        }
+
+        .maze-cell.wall {
+            background: #333;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ddd6fe;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .color-match {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .color-box {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .color-box:hover {
+            transform: scale(1.05);
+        }
+
+        .color-box.selected {
+            border-color: #6366f1;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-bg" id="heartsBackground"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>💝 Promise Day Special 💝</h1>
+            <p>11th February 2026</p>
+        </div>
+
+        <div id="welcomeScreen" class="welcome-screen">
+            <img src="https://media.tenor.com/bM7REDRn-BsAAAAi/bubu-dudu-sseeyall.gif" alt="Dudu Bubu Love">
+            <h2>My Dearest Love 💕</h2>
+            <p>Today is Promise Day, and I have some very special promises for you! 💖<br><br>
+            But... you'll have to play some cute little games to unlock each promise! 🎮✨<br><br>
+            Are you ready to discover my heartfelt promises? 😊</p>
+            <button class="start-btn" onclick="startGames()">Yes, Let's Start! 💝</button>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <!-- Game 1: Memory Match -->
+        <div id="game1" class="game-container">
+            <div class="game-header">
+                <h3>🎮 Game 1: Find the Matching Hearts! 💕</h3>
+                <p>Click on the hearts to find matching pairs!</p>
+            </div>
+            <div class="game-content">
+                <div class="puzzle-grid" id="memoryGrid"></div>
+            </div>
+            <div id="promise1" class="promise-reveal">
+                <img src="https://media.tenor.com/9PTYErxTTkAAAAAi/bubu-dudu-bubu.gif" alt="Dudu Bubu Promise">
+                <p class="promise-text">
+                    💍 I promise to marry you and spend forever with you! 💕<br>
+                    You are my today and all of my tomorrows! 💖
+                </p>
+                <button class="next-game-btn" onclick="nextGame(2)">Next Promise! 💝</button>
+            </div>
+        </div>
+
+        <!-- Game 2: Word Scramble -->
+        <div id="game2" class="game-container">
+            <div class="game-header">
+                <h3>🎮 Game 2: Unscramble Our Dream! 🏔️</h3>
+                <p>Unscramble this word to reveal a special place!</p>
+            </div>
+            <div class="game-content word-scramble">
+                <div class="scrambled-word">DATKRHANE</div>
+                <input type="text" class="word-input" id="wordInput" placeholder="Type your answer...">
+                <button class="submit-btn" onclick="checkWord()">Submit 💖</button>
+            </div>
+            <div id="promise2" class="promise-reveal">
+                <img src="https://media.tenor.com/Mw8Wv3bgnxkAAAAi/tkthao219-bubududu.gif" alt="Dudu Bubu Travel">
+                <p class="promise-text">
+                    🏔️ I promise to take you to your favorite Kedarnath! 🙏<br>
+                    We'll make beautiful memories in the mountains together! 💕
+                </p>
+                <button class="next-game-btn" onclick="nextGame(3)">Next Promise! 💝</button>
+            </div>
+        </div>
+
+        <!-- Game 3: Choice Game -->
+        <div id="game3" class="game-container">
+            <div class="game-header">
+                <h3>🎮 Game 3: Where Will We Get Married? 💒</h3>
+                <p>Choose the sacred place where we'll tie the knot!</p>
+            </div>
+            <div class="game-content">
+                <div class="choice-buttons">
+                    <button class="choice-btn" onclick="checkChoice('wrong')">🌊 By the Beach</button>
+                    <button class="choice-btn" onclick="checkChoice('correct')">⛰️ Triyuginarayan Temple</button>
+                    <button class="choice-btn" onclick="checkChoice('wrong')">🏰 In a Palace</button>
+                    <button class="choice-btn" onclick="checkChoice('wrong')">🌸 In a Garden</button>
+                </div>
+            </div>
+            <div id="promise3" class="promise-reveal">
+                <img src="https://media1.tenor.com/m/d1tU9PoJT4AAAAAC/bubu-and-dudu.gif" alt="Dudu Bubu Marriage">
+                <p class="promise-text">
+                    💒 I promise to marry you at the sacred Triyuginarayan Temple! ⛰️<br>
+                    Where Lord Shiva and Goddess Parvati were wed! 🙏💕<br>
+                    Our love will be blessed by the divine! ✨
+                </p>
+                <button class="next-game-btn" onclick="nextGame(4)">Next Promise! 💝</button>
+            </div>
+        </div>
+
+        <!-- Game 4: Color Match -->
+        <div id="game4" class="game-container">
+            <div class="game-header">
+                <h3>🎮 Game 4: Match Our Love Colors! 🌈</h3>
+                <p>Find all the PINK hearts! (Click 3 times)</p>
+            </div>
+            <div class="game-content">
+                <div class="color-match" id="colorGrid"></div>
+                <button class="submit-btn" onclick="checkColors()" style="display: none;" id="colorSubmit">Check! 💖</button>
+            </div>
+            <div id="promise4" class="promise-reveal">
+                <img src="https://media.tenor.com/GCkSyQ-gJVoAAAAi/bubu-dudu.gif" alt="Dudu Bubu Forever">
+                <p class="promise-text">
+                    ♾️ I promise to love you forever and always! 💕<br>
+                    Through every sunrise and sunset! 🌅<br>
+                    You're my forever person! 💖
+                </p>
+                <button class="next-game-btn" onclick="nextGame(5)">Next Promise! 💝</button>
+            </div>
+        </div>
+
+        <!-- Game 5: Simple Maze -->
+        <div id="game5" class="game-container">
+            <div class="game-header">
+                <h3>🎮 Game 5: Find Your Way to My Heart! 💗</h3>
+                <p>Click the path from Devva (💜) to Dummu (💙)! Avoid walls (⬛)</p>
+            </div>
+            <div class="game-content">
+                <div class="maze-game" id="mazeGrid"></div>
+            </div>
+            <div id="promise5" class="promise-reveal">
+                <img src="https://media1.tenor.com/m/6t26RRxlGoYAAAAd/dudu-cooking-dudu-bubu-cooking.gif" alt="Dudu Bubu Happy">
+                <p class="promise-text">
+                    🌟 I promise to always cherish you and make you smile! 😊<br>
+                    To support your dreams and be your biggest cheerleader! 📣<br>
+                    To cook your favorite food and take care of you! 🍜💕
+                </p>
+                <button class="next-game-btn" onclick="showFinalMessage()">See Final Message! 💝</button>
+            </div>
+        </div>
+
+        <div id="finalMessage" class="final-message">
+            <h2>All My Promises to You 💕</h2>
+            <img src="https://i.pinimg.com/originals/38/b2/f7/38b2f78a83f7e4f83413fc8bfd51e78a.gif" alt="Dudu Bubu Love">
+            <p class="promise-text">
+                💍 I promise to marry you and be yours forever<br>
+                🏔️ I promise to take you to Kedarnath<br>
+                💒 I promise to marry you at Triyuginarayan Temple<br>
+                ♾️ I promise to love you forever and always<br>
+                🌟 I promise to cherish you and make you happy every single day<br><br>
+                <strong style="font-size: 1.3em;">You are my everything! 💖<br>
+                Happy Promise Day, My Love! 💝</strong>
+            </p>
+            <img src="https://media.tenor.com/qeJtDi4BOkwAAAAi/tkthao219-bubududu.gif" alt="Dudu Bubu Kiss">
+        </div>
+    </div>
+
+    <script>
+        // Floating stars background
+        function createHearts() {
+            const heartsContainer = document.getElementById('heartsBackground');
+            const symbols = ['⭐', '✨', '💫', '🌟'];
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 15 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        createHearts();
+
+        let currentGame = 0;
+        const totalGames = 5;
+
+        function updateProgress() {
+            const progress = (currentGame / totalGames) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startGames() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('game1').classList.add('active');
+            currentGame = 1;
+            updateProgress();
+            initMemoryGame();
+        }
+
+        // Game 1: Memory Match
+        const emojis = ['💕', '💖', '💗', '💝'];
+        let cards = [...emojis, ...emojis];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function initMemoryGame() {
+            cards = shuffle(cards);
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+            cards.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'puzzle-piece';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.innerHTML = '❓';
+                card.onclick = () => flipCard(card);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length >= 2 || card.classList.contains('matched')) return;
+            
+            card.innerHTML = card.dataset.emoji;
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                
+                if (matchedPairs === 4) {
+                    setTimeout(() => {
+                        document.getElementById('promise1').classList.add('show');
+                    }, 500);
+                }
+            } else {
+                card1.innerHTML = '❓';
+                card2.innerHTML = '❓';
+            }
+            flippedCards = [];
+        }
+
+        // Game 2: Word Scramble
+        function checkWord() {
+            const input = document.getElementById('wordInput').value.toUpperCase();
+            if (input === 'KEDARNATH') {
+                document.getElementById('promise2').classList.add('show');
+            } else {
+                alert('Not quite! Try again! 💕');
+            }
+        }
+
+        // Game 3: Choice
+        function checkChoice(result) {
+            if (result === 'correct') {
+                document.getElementById('promise3').classList.add('show');
+            } else {
+                alert('Not this one! Try again! 💕');
+            }
+        }
+
+        // Game 4: Color Match
+        const colors = ['#ff69b4', '#ff69b4', '#ff69b4', '#87ceeb', '#98fb98', '#ffd700', '#ff6347', '#9370db', '#40e0d0'];
+        let selectedColors = [];
+
+        function initColorGame() {
+            const grid = document.getElementById('colorGrid');
+            grid.innerHTML = '';
+            shuffle(colors).forEach((color, index) => {
+                const box = document.createElement('div');
+                box.className = 'color-box';
+                box.style.backgroundColor = color;
+                box.dataset.color = color;
+                box.onclick = () => selectColor(box);
+                grid.appendChild(box);
+            });
+        }
+
+        function selectColor(box) {
+            if (box.classList.contains('selected')) {
+                box.classList.remove('selected');
+                selectedColors = selectedColors.filter(c => c !== box.dataset.color);
+            } else if (selectedColors.length < 3) {
+                box.classList.add('selected');
+                selectedColors.push(box.dataset.color);
+            }
+
+            if (selectedColors.length === 3) {
+                document.getElementById('colorSubmit').style.display = 'block';
+            }
+        }
+
+        function checkColors() {
+            const allPink = selectedColors.every(c => c === '#ff69b4');
+            if (allPink) {
+                document.getElementById('promise4').classList.add('show');
+            } else {
+                alert('Find all the PINK hearts! Try again! 💕');
+                selectedColors = [];
+                document.querySelectorAll('.color-box').forEach(box => box.classList.remove('selected'));
+                document.getElementById('colorSubmit').style.display = 'none';
+            }
+        }
+
+        // Game 5: Simple Maze
+        const mazeLayout = [
+            ['start', 'path', 'wall', 'wall', 'wall'],
+            ['wall', 'path', 'path', 'wall', 'wall'],
+            ['wall', 'wall', 'path', 'path', 'wall'],
+            ['wall', 'wall', 'wall', 'path', 'path'],
+            ['wall', 'wall', 'wall', 'wall', 'goal']
+        ];
+        let mazePath = [];
+        const correctPath = ['0-0', '0-1', '1-1', '1-2', '2-2', '2-3', '3-3', '3-4', '4-4'];
+
+        function initMaze() {
+            const grid = document.getElementById('mazeGrid');
+            grid.innerHTML = '';
+            mazeLayout.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'maze-cell';
+                    cellDiv.dataset.pos = `${i}-${j}`;
+                    
+                    if (cell === 'start') {
+                        cellDiv.innerHTML = '💜';
+                        cellDiv.classList.add('player');
+                    } else if (cell === 'goal') {
+                        cellDiv.innerHTML = '💙';
+                        cellDiv.classList.add('goal');
+                    } else if (cell === 'wall') {
+                        cellDiv.innerHTML = '⬛';
+                        cellDiv.classList.add('wall');
+                    }
+                    
+                    if (cell === 'path' || cell === 'start' || cell === 'goal') {
+                        cellDiv.onclick = () => selectMazeCell(cellDiv);
+                    }
+                    
+                    grid.appendChild(cellDiv);
+                });
+            });
+        }
+
+        function selectMazeCell(cell) {
+            const pos = cell.dataset.pos;
+            if (!mazePath.includes(pos)) {
+                mazePath.push(pos);
+                cell.style.background = 'linear-gradient(135deg, #ff69b4, #ff1493)';
+                
+                if (mazePath.length === correctPath.length) {
+                    const isCorrect = mazePath.every((p, i) => p === correctPath[i]);
+                    if (isCorrect) {
+                        setTimeout(() => {
+                            document.getElementById('promise5').classList.add('show');
+                        }, 500);
+                    } else {
+                        alert('Not quite the right path! Try again! 💕');
+                        mazePath = [];
+                        initMaze();
+                    }
+                }
+            }
+        }
+
+        function nextGame(gameNum) {
+            document.getElementById(`game${gameNum - 1}`).classList.remove('active');
+            document.getElementById(`game${gameNum}`).classList.add('active');
+            currentGame = gameNum;
+            updateProgress();
+
+            if (gameNum === 4) {
+                initColorGame();
+            } else if (gameNum === 5) {
+                initMaze();
+            }
+        }
+
+        function showFinalMessage() {
+            document.getElementById('game5').classList.remove('active');
+            document.getElementById('finalMessage').classList.add('show');
+            currentGame = 5;
+            updateProgress();
+        }
+    </script>
+</body>
+</html>
